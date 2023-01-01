@@ -15,3 +15,12 @@ class Artikels(models.Model):
     class Meta:
 
         verbose_name_plural = 'Artikels'
+
+class ProvAPI(models.Model):
+    id_prov = models.CharField(max_length=200, blank=True, null=True)
+    prov = models.CharField(max_length=200, blank=True, null=True)
+
+class KotaAPI(models.Model):
+    id_kota = models.CharField(max_length=200, blank=True, null=True)
+    kota = models.CharField(max_length=200, blank=True, null=True)
+    

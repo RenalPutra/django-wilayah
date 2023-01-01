@@ -6,7 +6,52 @@ import requests
 from blog.models import *
 from django.core.paginator import Paginator
 
+def sinkron_wilayah(request):
+    
+    URL = "https://api.goapi.id/v1/regional/provinsi?api_key=NCi8gCIlihiweY0d99LQAfGwA2Hr4V"
+    
+    r = requests.get(url = URL)
+    
+    data = r.json()
+    
+    for d in data['data']:
+        cek_prov = ProvAPI.objects.filter(id_prov=d['id'])
+        if cek_prov.exists():
+            pro = cek_prov.first()
+            pro.id_prov = d['id']
+            pro.prov = d['name']
+            pro.save()
+        else:
+            ProvAPI.objects.create(
+                id_prov = d['id'],
+                prov = d['name']        
 
+            )
+    ambil_reg = ProvAPI.objects.all()
+    
+   
+    for j in ambil_reg:
+        url_kota = "https://api.goapi.id/v1/regional/kota?provinsi_id={}&api_key=NCi8gCIlihiweY0d99LQAfGwA2Hr4V".format(j.id_prov)
+    
+        r = requests.get(url = url_kota) 
+        
+        data = r.json()
+        
+        for i in data['data']:  
+            cek_kab = KotaAPI.objects.filter(id_kota=i['id'])
+            if cek_kab.exists():     
+                kot = cek_kab.first()         
+                kot.id_kota = i['id']
+                kot.kota = i['name']
+                kot.save()
+            else:
+                KotaAPI.objects.create(
+                id_kota = i['id'],
+                kota = i['name']        
+
+            )
+                       
+    return HttpResponse("<h1>berhasil sinkron API Wilayah</h1>")
 
 def home(request):
     
@@ -17,21 +62,15 @@ def home(request):
     r = requests.get(url = URL)
     
     data = r.json()
-    
-    URL2 = "https://api.goapi.id/v1/regional/provinsi?api_key=NCi8gCIlihiweY0d99LQAfGwA2Hr4V"
-    
-    r2 = requests.get(url = URL2)
-    
-    data2 = r2.json()
-    
-    
+     
+    prov = ProvAPI.objects.all()
     
     context ={
-       
+        "data" : prov,
         "author" : data['author'],
         "content" : data['content'],
         "tags" : data['tags'],
-        "data" : data2['data'],
+
     }
     
     return render(request, template_name, context)
@@ -39,16 +78,11 @@ def home(request):
 def aboutus(request):
     
     template_name = "front/aboutus.html"
+   
+    prov = ProvAPI.objects.all()
     
-    URL = "https://api.goapi.id/v1/regional/provinsi?api_key=NCi8gCIlihiweY0d99LQAfGwA2Hr4V"
-    
-    r = requests.get(url = URL)
-    
-    data = r.json()
-    
-    context ={
-       
-        "data" : data['data']
+    context= {
+        "data" : prov
     }
     
     return render(request, template_name, context)
@@ -57,15 +91,10 @@ def presiden(request):
     
     template_name = "front/presiden.html"
     
-    URL = "https://api.goapi.id/v1/regional/provinsi?api_key=NCi8gCIlihiweY0d99LQAfGwA2Hr4V"
+    prov = ProvAPI.objects.all()
     
-    r = requests.get(url = URL)
-    
-    data = r.json()
-    
-    context ={
-       
-        "data" : data['data']
+    context= {
+        "data" : prov
     }
     
     return render(request, template_name, context)
@@ -74,13 +103,10 @@ def blog(request):
     
     template_name = "front/blog.html"
     
-    URL = "https://api.goapi.id/v1/regional/provinsi?api_key=NCi8gCIlihiweY0d99LQAfGwA2Hr4V"
-    
-    r = requests.get(url = URL)
-    
-    data = r.json()
+  
     
     art = Artikels.objects.all()
+    prov = ProvAPI.objects.all()
     
     p = Paginator(Artikels.objects.all(), 3)
     page = request.GET.get('page')
@@ -89,7 +115,7 @@ def blog(request):
     
     context ={
        
-        "data" : data['data'],
+        "data" : prov,
         "art" : art,
         "artis" : artis,
         "nums" : nums
@@ -103,15 +129,12 @@ def detailBlog(request, id):
     
     take = Artikels.objects.get(id=id)
     
-    URL = "https://api.goapi.id/v1/regional/provinsi?api_key=NCi8gCIlihiweY0d99LQAfGwA2Hr4V"
-    
-    r = requests.get(url = URL)
-    
-    data = r.json()
+    prov = ProvAPI.objects.all()
     
     context = {
+        "data" : prov,
         "take" : take,
-        "data" : data['data'],
+
     }
     
     return render(request, template_name, context)
@@ -120,27 +143,16 @@ def provinsi(request):
     
     template_name = "front/provinsi.html"
     
-    URL = "https://api.goapi.id/v1/regional/provinsi?api_key=NCi8gCIlihiweY0d99LQAfGwA2Hr4V"
+    get_id = request.POST.get('provinsi')
     
-    r = requests.get(url = URL)
+    prov = ProvAPI.objects.all()
     
-    data = r.json()
-    
-    wilayah = request.POST.get('provinsi')
-    
-    URL2 = "https://api.goapi.id/v1/regional/kota?provinsi_id={}&api_key=NCi8gCIlihiweY0d99LQAfGwA2Hr4V".format(wilayah)
-    
-    r2 = requests.get(url = URL2)
-    
-    data2 = r2.json()
-    
-        
-        
+    kota = KotaAPI.objects.filter(id_kota__startswith=get_id)
     
     context ={
        
-        "data" : data['data'],
-        "data2" : data2['data']
+        "data" : prov,
+        "data2" : kota
     }
     
     return render(request, template_name, context)

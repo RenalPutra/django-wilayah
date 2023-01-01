@@ -132,13 +132,12 @@
 				<form class="form-inline my-5 my-lg-0" method="post" action="{% url 'provinsi' %}"> 
 					{% csrf_token %}
 				  
-				  <select id="inputState" class="form-control mr-sm-2" name="provinsi">
+				  <select id="inputState" class="form-control mr-sm-2" name="provinsi" onchange="this.form.submit()">
 					<option selected>Choose Province</option>
 					{% for d in data %}
-					<option value={{d.id}} >{{d.name}}</option>
+					<option value={{d.id_prov}} >{{d.prov}}</option>
 					{% endfor %}
 				  </select>
-				  <button class="btn btn-outline-warning my-2 my-sm-0 mr-sm-2" type="submit">Find</button>
 				</form>
 			  </div>
 					<ul class="nav navbar-nav navbar-right">

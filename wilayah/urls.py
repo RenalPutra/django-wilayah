@@ -15,6 +15,7 @@ urlpatterns = [
     path("detail/<int:id>", detailBlog,name="detail"),
     path("provinsi/", provinsi ,name="provinsi"),
     path("login/", loginPage, name="login"),
+    path("sinkron/", sinkron_wilayah, name="sinkron"),
     # apps
     path("dashboard/", include('blog.urls'))
     
